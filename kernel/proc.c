@@ -705,12 +705,16 @@ procdump(void)
 int 
 getpgid(int pid)
 {
+
   struct proc* p;
   if(pid < 0) {
     return -1;
   }
   else if(pid == 0) {
-    return myproc()->pgid;
+    acquire(&myproc()->lock);
+    int pgid = myproc()->pgid;
+    release(&myproc()->lock);
+    return pgid;
   } 
   for(p = proc; p < &proc[NPROC]; ++p) {
     acquire(&p->lock);
@@ -728,7 +732,6 @@ int
 setpgid(int pid, int pgid)
 {
   struct proc* p;
-
   
   if(pgid < 0) {
     return -1;
@@ -740,10 +743,14 @@ setpgid(int pid, int pgid)
 
   else if(pid == 0) {
     if(pgid == 0) {
+      acquire(&myproc()->lock);
       myproc()->pgid = myproc()->pid;
+      release(&myproc()->lock);
     }
     else {
+      acquire(&myproc()->lock);
       myproc()->pgid = pgid;
+      release(&myproc()->lock);
     }
     return 0;
   } 
