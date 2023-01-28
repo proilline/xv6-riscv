@@ -100,5 +100,8 @@ sys_getpgid(void)
 uint64
 sys_setpgid(void)
 {
-  return -1;
+  int pid, pgid;
+  argint(0, &pid);
+  argint(1, &pgid);
+  return setpgid(pid, pgid);
 }

@@ -723,3 +723,44 @@ getpgid(int pid)
   }
   return -1;
 }
+
+int 
+setpgid(int pid, int pgid)
+{
+  struct proc* p;
+
+  
+  if(pgid < 0) {
+    return -1;
+  }
+
+  if(pid < 0) {
+    return -1;
+  }
+
+  else if(pid == 0) {
+    if(pgid == 0) {
+      myproc()->pgid = myproc()->pid;
+    }
+    else {
+      myproc()->pgid = pgid;
+    }
+    return 0;
+  } 
+
+  for(p = proc; p < &proc[NPROC]; ++p) {
+    acquire(&p->lock);
+    if(p->pid == pid) {
+      if(pgid == 0) {
+        p->pgid = p->pid;
+      }
+      else {
+        p->pgid = pgid;
+      }
+      release(&p->lock);
+      return 0;
+    }
+    release(&p->lock);
+  }
+  return -1;
+}
