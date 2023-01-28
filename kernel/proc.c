@@ -711,9 +711,7 @@ getpgid(int pid)
   }
   else if(pid == 0) {
     return myproc()->pgid;
-  } else {
-    return -1;
-  }
+  } 
   for(p = proc; p < &proc[NPROC]; ++p) {
     acquire(&p->lock);
     if(p->pid == pid) {
