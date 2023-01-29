@@ -13,9 +13,8 @@ struct proc proc[NPROC];
 struct proc *initproc;
 
 int nextpid = 1;
-int nextpgid = 1;
+
 struct spinlock pid_lock;
-struct spinlock pgid_lock;
 
 extern void forkret(void);
 static void freeproc(struct proc *p);
@@ -52,7 +51,6 @@ procinit(void)
   struct proc *p;
   
   initlock(&pid_lock, "nextpid");
-  initlock(&pgid_lock, "nextpgid");
   initlock(&wait_lock, "wait_lock");
   for(p = proc; p < &proc[NPROC]; p++) {
       initlock(&p->lock, "proc");
@@ -104,19 +102,6 @@ allocpid()
 
   return pid;
 }
-int
-allocpgid()
-{
-  int pgid;
-  
-  acquire(&pgid_lock);
-  pgid = nextpgid;
-  nextpid = nextpgid + 1;
-  release(&pgid_lock);
-
-  return pgid;
-}
-
 
 // Look in the process table for an UNUSED proc.
 // If found, initialize state required to run in the kernel,
@@ -139,7 +124,7 @@ allocproc(void)
 
 found:
   p->pid   = allocpid();
-  p->pgid  = allocpgid();
+  p->pgid  = p->pid;
   p->state = USED;
 
   // Allocate a trapframe page.
